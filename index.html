@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Event Manager Portal</title>
+
+    <!-- Bootstrap + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <!-- Top-right: User & Admin buttons -->
+    <div class="top-buttons">
+        <button class="toggle-btn user-btn" id="userLoginBtn" onclick="openLogin('user')">
+            <i class="fas fa-user me-1"></i>User Login
+        </button>
+        <button class="toggle-btn admin-btn" id="adminLoginBtn" onclick="openLogin('admin')">
+            <i class="fas fa-user-shield me-1"></i>Admin Login
+        </button>
+    </div>
+
+    <!-- USER VIEW (default) -->
+    <section id="userSection" class="section active">
+        <div class="container">
+            <div class="header-content text-center mb-5">
+                <h1 class="display-4 mb-3">Upcoming Events</h1>
+                <p class="lead text-white-50">
+                    Register for department seminars, workshops & hackathons
+                </p>
+            </div>
+            <div id="eventsList" class="row"></div>
+        </div>
+    </section>
+
+    <!-- ADMIN VIEW -->
+    <section id="adminSection" class="section">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2><i class="fas fa-calendar-alt me-2"></i>Manage Events</h2>
+            </div>
+
+            <div class="row mb-5">
+                <div class="col-md-8">
+                    <div class="event-form">
+                        <input type="text" id="eventTitle" class="form-control mb-3" placeholder="Event Title" />
+                        <input type="text" id="eventDesc" class="form-control mb-3" placeholder="Description" />
+                        <input type="datetime-local" id="eventDate" class="form-control mb-3" />
+                    </div>
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button class="btn btn-success w-100 py-3" onclick="addOrUpdateEvent()">
+                        <i class="fas fa-save me-2"></i> Save / Add Event
+                    </button>
+                </div>
+            </div>
+
+            <div id="adminEventsList" class="mb-5"></div>
+
+            <div class="registrations-section">
+                <h3><i class="fas fa-users me-2"></i>Registrations</h3>
+                <div id="registrationsTable"></div>
+                <button class="btn btn-primary mt-3" onclick="exportCSV()">
+                    <i class="fas fa-download me-2"></i>Export CSV
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- USER LOGIN MODAL -->
+    <div class="modal fade" id="userLoginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user me-2"></i>User Login
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="userName" class="form-label">Username</label>
+                    <input type="text" id="userName" class="form-control mb-3" placeholder="UserName" />
+
+                    <label for="userPass" class="form-label">Password</label>
+                    <div class="input-group">
+                        <input type="password" id="userPass" class="form-control" placeholder="Password" />
+                        <span class="input-group-text">
+                            <input type="checkbox" id="showUserPass" onclick="togglePassword('userPass','showUserPass')" />
+                            <small class="ms-1">Show</small>
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" onclick="loginUser()">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div class="modal fade" id="adminLoginModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-user-shield me-2"></i>Admin Login
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="adminName" class="form-label">Admin name</label>
+                    <input type="text" id="adminName" class="form-control mb-3" placeholder="AdminName" />
+
+                    <label for="adminPass" class="form-label">Password</label>
+                    <div class="input-group">
+                        <input type="password" id="adminPass" class="form-control" placeholder="Password" />
+                        <span class="input-group-text">
+                            <input type="checkbox" id="showAdminPass" onclick="togglePassword('adminPass','showAdminPass')" />
+                            <small class="ms-1">Show</small>
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-success" onclick="loginAdmin()">Login</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- REGISTRATION MODAL -->
+    <div class="modal fade" id="registerModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="modalTitle">
+                        <i class="fas fa-user-plus me-2"></i>Register for Event
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <label for="regName" class="form-label">Full name</label>
+                    <input type="text" id="regName" class="form-control mb-3" placeholder="First Last *" />
+
+                    <label for="regYear" class="form-label">Year</label>
+                    <input type="text" id="regYear" class="form-control mb-3" placeholder="Year (e.g., III Year)" />
+
+                    <label for="regDept" class="form-label">Department</label>
+                    <input type="text" id="regDept" class="form-control mb-3" placeholder="Department" />
+
+                    <label for="regEmail" class="form-label">Email</label>
+                    <input type="email" id="regEmail" class="form-control mb-3" placeholder="example@gmail.com *" />
+
+                    <label for="regPhone" class="form-label">Phone (10 digits, starts 8 or 9)</label>
+                    <input type="tel" id="regPhone" class="form-control" placeholder="98xxxxxxxx" />
+
+                    <input type="hidden" id="regEventId" />
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-primary" onclick="submitRegistration()">Register</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
